@@ -20,6 +20,9 @@ public class Controller {
     @Value("${AuthServiceIp}")
     private String authServiceIp;
 
+    @Value("${CourseServiceIp}")
+    private String courseServiceIp;
+
     private String getRole(String jwttoken){
 
         System.out.println(authServiceIp);
@@ -37,34 +40,63 @@ public class Controller {
         return -1;
     }
 
+    private boolean courseExists(int courseId){
+        System.out.println(courseServiceIp);
+        final String uri = "http://"+ courseServiceIp +":8080/getRole";
+        RestTemplate restTemplate = new RestTemplate();
+        String s = restTemplate.getForObject(uri,String.class);
+        if("ok".equals(s)){
+            return true;
+        }
+        return false;
+    }
+
     @GetMapping(value = "/takecourse")
-    public void takeCourse(String jwttoken, int courseId){
+    public String takeCourse(String jwttoken, int courseId){
         if(getRole(jwttoken).equals("ROLE_STUDENT") || getRole(jwttoken).equals("ROLE_ADMIN") ) {
             //check if course exists
-
-            TakenCourse tk = new TakenCourse(getUserId(jwttoken),courseId);
-            repository.save(tk);
+            if(courseExists(courseId)) {
+                TakenCourse tk = new TakenCourse(getUserId(jwttoken), courseId);
+                repository.save(tk);
+                return "ok";
+            }
+            else{
+                return "courseNotFound";
+            }
         }
+        return "not authenticated";
     }
 
     @GetMapping(value = "/removetakencourse")
-    public void removeTakenCourse(String jwttoken, int courseId){
+    public String removeTakenCourse(String jwttoken, int courseId){
         if(getRole(jwttoken).equals("ROLE_STUDENT") || getRole(jwttoken).equals("ROLE_ADMIN") ) {
-
+            if(courseExists(courseId)){
+                if(courseExists(courseId)) {
+                    repository.deleteById(courseId);
+                    return "ok";
+                }
+                else{
+                    return "courseNotFound";
+                }
+            }
         }
+        return "not authenticated";
     }
 
     @GetMapping(value = "/getstudentcourseslist")
-    public void getStudentCoursesList(String jwttoken){
+    public String getStudentCoursesList(String jwttoken){
         if(getRole(jwttoken).equals("ROLE_STUDENT") || getRole(jwttoken).equals("ROLE_ADMIN") ) {
-
+            //return repository.finda
+            return "todo";
         }
+        return "not authenticated";
     }
 
     @GetMapping(value = "/getcoursememberlist")
-    public void getCourseMembersList(String jwttoken){
+    public String getCourseMembersList(String jwttoken){
         if(getRole(jwttoken).equals("ROLE_PROFESSOR") || getRole(jwttoken).equals("ROLE_ADMIN") ) {
-
+            return "todo";
         }
+        return "not authenticated";
     }
 }
