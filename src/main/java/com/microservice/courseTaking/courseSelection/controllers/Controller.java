@@ -35,7 +35,7 @@ public class Controller {
     private String getRole(String jwttoken){
 
         System.out.println(authServiceIp);
-        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getRole";
+        final String uri = "http://"+ authServiceIp +":8080/getRole";
         System.out.println(jwttoken);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwttoken);
@@ -46,13 +46,7 @@ public class Controller {
     }
 
     private int getUserId(String jwttoken){
-        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getRole";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwttoken);
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-        String s = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody().toString();
-        return s;
+        return -1;
     }
 
     private boolean courseExists(int courseId){
@@ -64,6 +58,7 @@ public class Controller {
             return true;
         }
         return false;
+
     }
 
     @GetMapping(value = "/takecourse")
