@@ -1,6 +1,6 @@
-package com.microservice.courseTaking.courseSelection.repository;
+package com.microservice.educationPortal.courseSelection.repository;
 
-import com.microservice.courseTaking.courseSelection.models.TakenCourse;
+import com.microservice.educationPortal.courseSelection.models.TakenCourse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

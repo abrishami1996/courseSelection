@@ -1,4 +1,4 @@
-package com.microservice.courseTaking.courseSelection.models;
+package com.microservice.educationPortal.courseSelection.models;
 
 import javax.persistence.*;
 import java.util.Date;

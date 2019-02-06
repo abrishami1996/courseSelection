@@ -1,7 +1,7 @@
-package com.microservice.courseTaking.courseSelection.controllers;
+package com.microservice.educationPortal.courseSelection.controllers;
 
-import com.microservice.courseTaking.courseSelection.models.TakenCourse;
-import com.microservice.courseTaking.courseSelection.repository.TakenCourseRepository;
+import com.microservice.educationPortal.courseSelection.models.TakenCourse;
+import com.microservice.educationPortal.courseSelection.repository.TakenCourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -35,7 +35,7 @@ public class Controller {
     private String getRole(String jwttoken){
 
         System.out.println(authServiceIp);
-        final String uri = "http://"+ authServiceIp +":8080/getRole";
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getRole";
         System.out.println(jwttoken);
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwttoken);
@@ -46,12 +46,18 @@ public class Controller {
     }
 
     private int getUserId(String jwttoken){
-        return -1;
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getUserId";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwttoken);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+        Integer res = restTemplate.exchange(uri, HttpMethod.GET,entity,Integer.class).getBody();
+        return res;
     }
 
     private boolean courseExists(int courseId){
         System.out.println(courseServiceIp);
-        final String uri = "http://"+ courseServiceIp +":8080/getRole";
+        final String uri = "http://"+ courseServiceIp +":"+courseServicePort+"/getRole";
         RestTemplate restTemplate = new RestTemplate();
         String s = restTemplate.getForObject(uri,String.class);
         if("ok".equals(s)){

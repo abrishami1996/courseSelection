@@ -1,4 +1,4 @@
-package com.microservice.courseTaking.courseSelection;
+package com.microservice.educationPortal.courseSelection;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
