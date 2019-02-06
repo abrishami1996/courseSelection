@@ -26,34 +26,44 @@ public class Controller {
     @Value("${CourseServiceIp}")
     private String courseServiceIp;
 
+    @Value("${AuthServicePort}")
+    private String authServicePort;
+
+    @Value("${CourseServicePort}")
+    private String courseServicePort;
+
     private String getRole(String jwttoken){
 
-//        System.out.println(authServiceIp);
-//        final String uri = "http://"+ authServiceIp +":8080/getRole";
-//        System.out.println(jwttoken);
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setBearerAuth(jwttoken);
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-//        String s = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody().toString();
-//        return s;
-        return "ROLE_ADMIN";
+        System.out.println(authServiceIp);
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getRole";
+        System.out.println(jwttoken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwttoken);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+        String s = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody().toString();
+        return s;
     }
 
     private int getUserId(String jwttoken){
-        return -1;
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getRole";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwttoken);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+        String s = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody().toString();
+        return s;
     }
 
     private boolean courseExists(int courseId){
-//        System.out.println(courseServiceIp);
-//        final String uri = "http://"+ courseServiceIp +":8080/getRole";
-//        RestTemplate restTemplate = new RestTemplate();
-//        String s = restTemplate.getForObject(uri,String.class);
-//        if("ok".equals(s)){
-//            return true;
-//        }
-//        return false;
-        return true;
+        System.out.println(courseServiceIp);
+        final String uri = "http://"+ courseServiceIp +":8080/getRole";
+        RestTemplate restTemplate = new RestTemplate();
+        String s = restTemplate.getForObject(uri,String.class);
+        if("ok".equals(s)){
+            return true;
+        }
+        return false;
     }
 
     @GetMapping(value = "/takecourse")
