@@ -42,7 +42,7 @@ public class Controller {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
         String s = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody().toString();
-        return s;
+        return s.substring(1,s.length()-1);
     }
 
     private int getUserId(String jwttoken){
