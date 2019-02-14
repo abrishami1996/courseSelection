@@ -43,8 +43,8 @@ public class Controller {
         return s.substring(1,s.length()-1);
     }
 
-    private int getUserId(String jwttoken){
-        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getUserId";
+    private int getUserFK(String jwttoken){
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getUserFK";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwttoken);
         RestTemplate restTemplate = new RestTemplate();
@@ -68,10 +68,10 @@ public class Controller {
     @GetMapping(value = "/takecourse")
     public String takeCourse(String jwttoken, int courseId){
         String role = getRole(jwttoken);
-        if(role.equals("ROLE_STUDENT") || role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
+        if(role.equals("ROLE_STUDENT")) {
             //check if course exists
             if(courseExists(courseId)) {
-                TakenCourse tk = new TakenCourse(getUserId(jwttoken), courseId);
+                TakenCourse tk = new TakenCourse(getUserFK(jwttoken), courseId);
                 repository.save(tk);
                 return "ok";
             }
@@ -81,6 +81,26 @@ public class Controller {
         }
         return "not authenticated";
     }
+
+
+    @GetMapping(value = "/takecourseforstudent")
+    public String takeCourseForStudent(String jwttoken, int courseId,int studentId){
+        String role = getRole(jwttoken);
+        if( role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
+            //check if course exists
+            if(courseExists(courseId)) {
+                //check if student id is valid (exist and is student)
+                TakenCourse tk = new TakenCourse(studentId, courseId);
+                repository.save(tk);
+                return "ok";
+            }
+            else{
+                return "courseNotFound";
+            }
+        }
+        return "not authenticated";
+    }
+
 
     @GetMapping(value = "/removetakencourse")
     public String removeTakenCourse(String jwttoken, int courseId){
