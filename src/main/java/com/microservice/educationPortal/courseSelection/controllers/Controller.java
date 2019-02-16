@@ -133,7 +133,8 @@ public class Controller {
         if(role.equals("ROLE_STUDENT")) {
             long studentNumber = getStudentNumber(jwttoken);
             try {
-                repository.deleteByStudentNumberAndCourseCode(studentNumber,courseCode);
+                TakenCourse tk = repository.findByCourseCodeAndStudentNumber(courseCode,studentNumber);
+                repository.deleteById(tk.getId());
             }
             catch (Exception e){
                 e.printStackTrace();

@@ -7,6 +7,10 @@ import javax.persistence.*;
 public class TakenCourse {
 
 
+    public int getId() {
+        return id;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
