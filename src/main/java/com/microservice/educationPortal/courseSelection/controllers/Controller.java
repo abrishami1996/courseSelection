@@ -43,6 +43,7 @@ public class Controller {
         return s.substring(1,s.length()-1);
     }
 
+    @Deprecated
     private int getUserFK(String jwttoken){
         final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getUserFK";
         HttpHeaders headers = new HttpHeaders();
@@ -53,8 +54,24 @@ public class Controller {
         return res;
     }
 
-    private boolean courseExists(int courseId){
-        final String uri = "http://"+ courseServiceIp +":"+courseServicePort+"/exists?courseid="+courseId;
+    private Long getStudentNumber(String jwttoken){
+        final String uri = "http://"+ authServiceIp +":"+authServicePort+"/getStudentNumber";
+        System.out.println(uri);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwttoken);
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+        try {
+            String res = restTemplate.exchange(uri, HttpMethod.GET,entity,String.class).getBody();
+            return Long.parseLong(res);
+        }catch (Exception e){
+            return null;
+        }
+
+    }
+
+    private boolean courseExists(int courseCode){
+        final String uri = "http://"+ courseServiceIp +":"+courseServicePort+"/exists?courseCode="+courseCode;
         RestTemplate restTemplate = new RestTemplate();
         String s = restTemplate.getForObject(uri,String.class);
         System.out.println(s);
@@ -65,13 +82,23 @@ public class Controller {
 
     }
 
+
+//    private boolean studentExists(int studentNumber){
+//        //todo
+//        return false;
+//    }
+
     @GetMapping(value = "/takecourse")
-    public String takeCourse(String jwttoken, int courseId){
+    public String takeCourse(String jwttoken, int courseCode){
         String role = getRole(jwttoken);
         if(role.equals("ROLE_STUDENT")) {
-            //check if course exists
-            if(courseExists(courseId)) {
-                TakenCourse tk = new TakenCourse(getUserFK(jwttoken), courseId);
+            if(courseExists(courseCode)) {
+                long studentNumber = getStudentNumber(jwttoken);
+                if(repository.findByCourseCodeAndStudentNumber(courseCode,studentNumber) != null){
+                    return "course already selected";
+                }
+
+                TakenCourse tk = new TakenCourse(studentNumber, courseCode);
                 repository.save(tk);
                 return "ok";
             }
@@ -84,13 +111,11 @@ public class Controller {
 
 
     @GetMapping(value = "/takecourseforstudent")
-    public String takeCourseForStudent(String jwttoken, int courseId,int studentId){
+    public String takeCourseForStudent(String jwttoken, int courseCode,int studentNumber){
         String role = getRole(jwttoken);
         if( role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
-            //check if course exists
-            if(courseExists(courseId)) {
-                //check if student id is valid (exist and is student)
-                TakenCourse tk = new TakenCourse(studentId, courseId);
+            if(courseExists(courseCode)) {
+                TakenCourse tk = new TakenCourse(studentNumber, courseCode);
                 repository.save(tk);
                 return "ok";
             }
@@ -103,30 +128,48 @@ public class Controller {
 
 
     @GetMapping(value = "/removetakencourse")
-    public String removeTakenCourse(String jwttoken, int courseId){
+    public String removeTakenCourse(String jwttoken, int courseCode){
         String role = getRole(jwttoken);
-        if(role.equals("ROLE_STUDENT") || role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
-            if(courseExists(courseId)){
-                if(courseExists(courseId)) {
-                    repository.deleteById(courseId);
-                    return "ok";
-                }
-                else{
-                    return "courseNotFound";
-                }
+        if(role.equals("ROLE_STUDENT")) {
+            long studentNumber = getStudentNumber(jwttoken);
+            try {
+                repository.deleteByStudentNumberAndCourseCode(studentNumber,courseCode);
             }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return "ok";
         }
         return "not authenticated";
     }
 
+    @GetMapping(value = "/removetakencourseforstudent")
+    public String removeTakenCourseForStudent(String jwttoken, long studentNumber, int courseCode){
+        String role = getRole(jwttoken);
+
+        if( role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
+//            if(studentExists(studentNumber)){
+                if(courseExists(courseCode)) {
+                    repository.deleteByCourseCode(courseCode);
+                    return "ok";
+                }
+
+//            }
+            return "invalid input";
+        }
+        return "not authenticated";
+    }
+
+
     @GetMapping(value = "/getstudentcourseslist")
-    public String getStudentCoursesList(String jwttoken,int studentId){
+    public String getStudentCoursesList(String jwttoken,long studentNumber){
         String role = getRole(jwttoken);
         if(role.equals("ROLE_STUDENT") || role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
-            List<TakenCourse> l = repository.findBystudentId(studentId);
+            List<TakenCourse> l = repository.findByStudentNumber(studentNumber);
             ArrayList<Integer> resList = new ArrayList<Integer>();
             for(int i=0;i<l.size();i++){
-                resList.add(l.get(i).getCourseId());
+                resList.add(l.get(i).getCourseCode());
             }
             return resList.toString();
         }
@@ -134,13 +177,13 @@ public class Controller {
     }
 
     @GetMapping(value = "/getcoursememberlist")
-    public String getCourseMembersList(String jwttoken, int courseId){
+    public String getCourseMembersList(String jwttoken, int courseCode){
         String role = getRole(jwttoken);
         if(role.equals("ROLE_PROFESSOR") || role.equals("ROLE_ADMIN") || role.equals("ROLE_EMPLOYEE")) {
-            List<TakenCourse> l = repository.findBycourseId(courseId);
-            ArrayList<Integer> resList = new ArrayList<Integer>();
+            List<TakenCourse> l = repository.findByCourseCode(courseCode);
+            ArrayList<Long> resList = new ArrayList<>();
             for(int i=0;i<l.size();i++){
-                resList.add(l.get(i).getStudentId());
+                resList.add(l.get(i).getStudentNumber());
             }
             return resList.toString();
         }

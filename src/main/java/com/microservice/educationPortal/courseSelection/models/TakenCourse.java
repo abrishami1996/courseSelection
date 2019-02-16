@@ -1,7 +1,6 @@
 package com.microservice.educationPortal.courseSelection.models;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 @Table(name="takenCourses")
@@ -12,32 +11,33 @@ public class TakenCourse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
 
+    private long studentNumber;
+    private int courseCode;
 
-    private int studentId;
 
-    public TakenCourse(int studentId, int courseId) {
-        this.studentId = studentId;
-        this.courseId = courseId;
+    public TakenCourse(long studentNumber, int courseCode) {
+        this.studentNumber = studentNumber;
+        this.courseCode = courseCode;
     }
 
     public TakenCourse() {
     }
 
-    public int getStudentId() {
-        return studentId;
+    public long getStudentNumber() {
+        return studentNumber;
     }
 
-    public int getCourseId() {
-        return courseId;
+    public int getCourseCode() {
+        return courseCode;
     }
 
-    private int courseId;
 
-    public void setStudentId(int studentId) {
-        this.studentId = studentId;
+
+    public void setStudentNumber(long studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
-    public void setCourseId(int courseId) {
-        this.courseId = courseId;
+    public void setCourseCode(int courseCode) {
+        this.courseCode = courseCode;
     }
 }
